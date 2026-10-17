@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheduler Planner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <h1 data-i18n="appTitle">Scheduler Planner</h1>
+      <p class="sub" data-i18n="appSub">Month schedule for a 3-person team · scheduler engine v2</p>
+      <div class="month-nav">
+        <button id="prevBtn" aria-label="Previous month">◀</button>
+        <div class="month-drop">
+          <select id="yearSelect" aria-label="Year"></select>
+          <select id="monthSelect" aria-label="Month"></select>
+        </div>
+        <button id="todayBtn" data-i18n="today" aria-label="Go to today's month">Today</button>
+        <button id="nextBtn" aria-label="Next month">▶</button>
+        <button id="langBtn" aria-label="Toggle language">🇬🇧 EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="layout">
+      <section class="panel calendar-panel">
+        <h2 data-i18n="calendar">Calendar</h2>
+        <div id="calendar" class="calendar"></div>
+        <div class="legend">
+          <span><span style="background:var(--off);color:#fff;border-radius:3px;padding:1px 5px">●</span> <span data-i18n="off">off</span></span>
+          <span><span style="background:var(--p0);color:#fff;border-radius:3px;padding:1px 5px">●</span> <span style="color:var(--p0)" data-i18n="printPerson1">Person 1</span></span>
+          <span><span style="background:var(--p1);color:#fff;border-radius:3px;padding:1px 5px">●</span> <span style="color:var(--p1)" data-i18n="printPerson2">Person 2</span></span>
+          <span><span style="background:var(--p2);color:#fff;border-radius:3px;padding:1px 5px">●</span> <span style="color:var(--p2)" data-i18n="printPerson3">Person 3</span></span>
+        </div>
+      </section>
+
+      <aside class="panel summary-panel">
+        <h2 data-i18n="people">People</h2>
+        <div class="names" id="namesRow">
+          <input class="name-input n0" id="name0" maxlength="16" placeholder="Person 1">
+          <input class="name-input n1" id="name1" maxlength="16" placeholder="Person 2">
+          <input class="name-input n2" id="name2" maxlength="16" placeholder="Person 3">
+        </div>
+        <div id="summary" class="summary"></div>
+        <div class="status-bar" id="statusBar"></div>
+      </aside>
+    </div>
+
+    <section class="actions">
+      <div class="row">
+        <button id="regenBtn" class="primary" data-i18n="newSchedule">🔄 New schedule</button>
+        <button id="advToggle" data-i18n="advanced">Advanced ▾</button>
+        <div id="advPanel" class="hidden">
+          <label class="seed"><span data-i18n="scheduleVariant">Schedule variant</span> <input type="number" id="seedInput" min="0" max="2147483647" value="42"> <button id="seedApply" data-i18n="apply">apply</button></label>
+        </div>
+        <button id="exportCsv" data-i18n="csv">📥 CSV</button>
+        <button id="exportPdf" data-i18n="pdf">🖨️ PDF (print to PDF)</button>
+      </div>
+      <div class="row rules-row" id="rulesRow">
+        <strong class="rules-title" data-i18n="rules">Rules:</strong>
+        <label><span data-i18n="minHours">Min h</span> <input type="number" id="ruleHours" min="0" max="300" step="1" value="150"></label>
+        <label><span data-i18n="minOffPerWeek">Off/week</span> <input type="number" id="ruleOff" min="0" max="3" step="1" value="2"></label>
+        <label><span data-i18n="maxStreak">Max streak</span> <input type="number" id="ruleStreak" min="1" max="31" step="1" value="6"></label>
+        <label><input type="checkbox" id="ruleWeekend" checked> <span data-i18n="fullWeekend">Full weekend</span></label>
+        <button id="rulesQuickDefaults" data-i18n="defaults">Defaults</button>
+      </div>
+      <div class="row">
+        <span class="hint" data-i18n="hint">Click a day cell, then a person chip to rest them on that day.</span>
+        <span class="hint" id="selInfo"></span>
+      </div>
+    </section>
+  </main>
+
+  <div id="pickerOverlay" class="overlay hidden">
+    <div class="picker">
+      <h3 id="pickerLabel"></h3>
+      <div id="pickerList" class="picker-list"></div>
+      <div class="actions">
+        <button id="pickerCancel" data-i18n="cancel">Cancel</button>
+        <button id="pickerOk" class="primary" data-i18n="ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="scheduler.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
