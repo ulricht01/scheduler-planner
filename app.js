@@ -42,7 +42,7 @@
       maxStreak: 'Max streak',
       fullWeekend: 'Full weekend',
       defaults: 'Defaults',
-      hint: 'Click a day cell, then a person chip to rest them. Drag a shift onto another to swap.',
+      hint: 'Click a day cell, then a person chip to rest them. Drag a shift onto another to swap. Drag a shift onto an off-chip (same day) to trade days off.',
       selected: 'Selected {0}',
       generateEmpty: 'Generate a schedule to see who is working.',
       prevMonth: 'Previous month',
@@ -104,7 +104,7 @@
       maxStreak: 'Max Serie',
       fullWeekend: 'Volle Wochenende frei',
       defaults: 'Standard',
-      hint: 'Klicke auf eine Zelle, dann auf einen Namen, um ihn einzuteilen. Ziehe eine Schicht auf eine andere, um zu tauschen.',
+      hint: 'Klicke auf eine Zelle, dann auf einen Namen, um ihn einzuteilen. Ziehe eine Schicht auf eine andere, um zu tauschen. Ziehe eine Schicht auf ein „frei“-Chip (gleicher Tag), um freie Tage zu tauschen.',
       selected: 'Gewählt {0}',
       generateEmpty: 'Erstelle einen Dienstplan, um zu sehen, wer arbeitet.',
       prevMonth: 'Vorheriger Monat',
@@ -239,9 +239,10 @@
           b.className = 'shift' + (si === 0 ? ' a' : ' b');
           b.style.background = sh.person >= 0 ? s.color : '#94a3b8';
           b.style.color = '#fff';
-          b.draggable = sh.person >= 0;
+          b.draggable = true;
           b.dataset.dayIdx = dayIndex;
           b.dataset.shiftIdx = si;
+          b.dataset.isOff = 'false';
           var who = sh.person >= 0 ? state.names[sh.person] : '–';
           var letter = String.fromCharCode(65 + si);
           b.innerHTML = '<span class="letter">' + letter + '</span> ' + escapeHtml(who);
@@ -256,6 +257,10 @@
           cell.classList.add('off-day');
           var ob = document.createElement('div');
           ob.className = 'shift off';
+          ob.draggable = true;
+          ob.dataset.dayIdx = dayIndex;
+          ob.dataset.shiftIdx = '-1';
+          ob.dataset.isOff = 'true';
           ob.textContent = t('offChip', escapeHtml(state.names[day.off]));
           ob.title = t('offTitle', state.names[day.off]);
           sw.appendChild(ob);
@@ -488,21 +493,49 @@
     render();
   }
 
-  function swapShifts(d1, s1, d2, s2) {
+  function swapChips(d1, s1, d2, s2) {
+    // s1/s2: 0 or 1 = shift slot, -1 = off person
     if (d1 === d2 && s1 === s2) return;
     var day1 = state.schedule.days[d1];
     var day2 = state.schedule.days[d2];
-    var p1 = day1.shifts[s1].person;
-    var p2 = day2.shifts[s2].person;
+
+    var p1 = s1 === -1 ? day1.off : day1.shifts[s1].person;
+    var p2 = s2 === -1 ? day2.off : day2.shifts[s2].person;
     if (p1 < 0 || p2 < 0 || p1 === p2) return;
-    // Cannot place the off person of either day onto a shift of that day
-    if (p2 === day1.off || p1 === day2.off) return;
-    // After swap, each day must still have two different workers
-    var day1Other = day1.shifts[1 - s1].person;
-    var day2Other = day2.shifts[1 - s2].person;
-    if (p2 === day1Other || p1 === day2Other) return;
-    day1.shifts[s1].person = p2;
-    day2.shifts[s2].person = p1;
+
+    // ---- Shift ↔ Shift ----
+    if (s1 !== -1 && s2 !== -1) {
+      if (d1 === d2) {
+        // Same day: just swap A↔B
+        day1.shifts[s1].person = p2;
+        day1.shifts[s2].person = p1;
+      } else {
+        // Different days: each day must keep two distinct workers
+        var day1Other = day1.shifts[1 - s1].person;
+        var day2Other = day2.shifts[1 - s2].person;
+        if (p2 === day1Other || p1 === day2Other) return;
+        // Cannot place the off person of a day onto a shift of that day
+        if (p2 === day1.off || p1 === day2.off) return;
+        day1.shifts[s1].person = p2;
+        day2.shifts[s2].person = p1;
+      }
+    }
+    // ---- Shift ↔ Off (same day only) ----
+    else if (d1 === d2 && (s1 === -1 || s2 === -1)) {
+      var day = day1;
+      var shiftIdx = s1 === -1 ? s2 : s1;
+      var offPerson = s1 === -1 ? p1 : p2;
+      var shiftPerson = s1 === -1 ? p2 : p1;
+      day.off = shiftPerson;
+      day.shifts[shiftIdx].person = offPerson;
+    }
+    // ---- Off ↔ Off (different days) ----
+    else if (s1 === -1 && s2 === -1 && d1 !== d2) {
+      day1.off = p2;
+      day2.off = p1;
+    }
+    else return;
+
     revalidate();
     refreshTotals();
     render();
@@ -766,15 +799,15 @@
       render();
     });
 
-    // ---- drag & drop to swap shifts ----
+    // ---- drag & drop to swap shifts / off-days ----
     $('calendar').addEventListener('dragstart', function (e) {
       var shift = e.target.closest('.shift');
-      if (!shift || !shift.dataset.dayIdx || !shift.draggable) return;
+      if (!shift || !shift.dataset.dayIdx) return;
       var d = parseInt(shift.dataset.dayIdx, 10);
-      var s = shift.classList.contains('a') ? 0 : 1;
-      var p = state.schedule.days[d].shifts[s].person;
+      var s = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
+      var p = s === -1 ? state.schedule.days[d].off : state.schedule.days[d].shifts[s].person;
       if (p < 0) return;
-      dragState = { dayIdx: d, shiftIdx: s, personIdx: p };
+      dragState = { dayIdx: d, shiftIdx: s, personIdx: p, isOff: s === -1 };
       shift.classList.add('drag-source');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', d + ',' + s);
@@ -787,7 +820,7 @@
       var shift = e.target.closest('.shift');
       if (!shift || !shift.dataset.dayIdx) return;
       var d = parseInt(shift.dataset.dayIdx, 10);
-      var s = shift.classList.contains('a') ? 0 : 1;
+      var s = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
       if (d !== dragState.dayIdx || s !== dragState.shiftIdx) {
         shift.classList.add('drop-target');
       }
@@ -809,9 +842,9 @@
         return;
       }
       var d2 = parseInt(shift.dataset.dayIdx, 10);
-      var s2 = shift.classList.contains('a') ? 0 : 1;
+      var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
       if (d2 !== dragState.dayIdx || s2 !== dragState.shiftIdx) {
-        swapShifts(dragState.dayIdx, dragState.shiftIdx, d2, s2);
+        swapChips(dragState.dayIdx, dragState.shiftIdx, d2, s2);
       }
       dragState = null;
     });
