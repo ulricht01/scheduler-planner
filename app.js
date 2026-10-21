@@ -953,13 +953,14 @@
       var target = document.elementFromPoint(e.clientX, e.clientY);
       var shift = target ? target.closest('.shift') : null;
       document.querySelectorAll('.shift').forEach(function (el) {
-        el.classList.remove('drag-source', 'drop-target');
+        el.classList.remove('drag-source', 'drop-target', 'swap-target');
       });
       if (shift && shift.dataset.dayIdx && !shift.classList.contains('drag-source')) {
         var d2 = parseInt(shift.dataset.dayIdx, 10);
         var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
         if (d2 !== mouseState.dayIdx || s2 !== mouseState.shiftIdx) {
           swapChips(mouseState.dayIdx, mouseState.shiftIdx, d2, s2);
+          shift.classList.remove('swap-target');
         }
       }
       mouseState = null;
@@ -1081,9 +1082,8 @@
           var d2 = parseInt(shift.dataset.dayIdx, 10);
           var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
           if (d2 !== touchState.dayIdx || s2 !== touchState.shiftIdx) {
-            shift.classList.add('swap-target');
-            shift.dataset.from = state.names[touchState.personIdx];
             swapChips(touchState.dayIdx, touchState.shiftIdx, d2, s2);
+            shift.classList.remove('swap-target');
           }
         }
       }
