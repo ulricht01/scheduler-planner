@@ -221,7 +221,9 @@ body {
 .cal-cell.muted { opacity: .45; cursor: default; background: #f8fafc; }
 
 @media (max-width: 768px) {
-  /* 3 days per row on mobile - use CSS grid on calendar */
+  /* Center the calendar horizontally */
+  .cal-wrap { display: flex; justify-content: center; }
+  #calendar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
   #calendar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .cal-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .cal-head { display: none; }
