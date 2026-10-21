@@ -1040,26 +1040,6 @@
       }
     }
 
-    document.addEventListener('mousemove', function (e) {
-      hideGhost();
-      if (mouseState) {
-        var target = document.elementFromPoint(e.clientX, e.clientY);
-        var shift = target ? target.closest('.shift') : null;
-        document.querySelectorAll('.shift').forEach(function (el) {
-          el.classList.remove('drag-source', 'drop-target');
-        });
-        if (shift && shift.dataset.dayIdx && !shift.classList.contains('drag-source')) {
-          var d2 = parseInt(shift.dataset.dayIdx, 10);
-          var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
-          if (d2 !== mouseState.dayIdx || s2 !== mouseState.shiftIdx) {
-            shift.classList.add('swap-target');
-            shift.dataset.from = state.names[mouseState.personIdx];
-            swapChips(mouseState.dayIdx, mouseState.shiftIdx, d2, s2);
-          }
-        }
-      }
-      mouseState = null;
-    });
 
     document.addEventListener('touchmove', function (e) {
       if (touchState) {
