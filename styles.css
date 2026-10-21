@@ -416,6 +416,7 @@ button.primary:hover { background: var(--accent-dark); }
 
 /* ---- day detail overlay ---- */
 .day-detail {
+  position: relative;
   background: #fff;
   border-radius: 14px;
   padding: 18px;
