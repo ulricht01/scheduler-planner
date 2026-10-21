@@ -80,7 +80,13 @@
       printPerson2: 'Person 2',
       printPerson3: 'Person 3',
       weekendFull: 'full weekend',
-      weekendNoFull: 'no weekend rule'
+      weekendNoFull: 'no weekend rule',
+      dayDetail: 'Day detail',
+      shiftA: 'Shift A',
+      shiftB: 'Shift B',
+      offPerson: 'Off',
+      totalHours: 'Total hours',
+      close: 'Close'
     },
     de: {
       appTitle: 'Scheduler Planner',
@@ -142,7 +148,13 @@
       printPerson2: 'Person 2',
       printPerson3: 'Person 3',
       weekendFull: 'volles Wochenende',
-      weekendNoFull: 'keine Wochenend-Regel'
+      weekendNoFull: 'keine Wochenend-Regel',
+      dayDetail: 'Tag-Details',
+      shiftA: 'Schicht A',
+      shiftB: 'Schicht B',
+      offPerson: 'Frei',
+      totalHours: 'Std. gesamt',
+      close: 'Schließen'
     }
   };
 
@@ -248,7 +260,10 @@
           b.innerHTML = '<span class="letter">' + letter + '</span> ' + escapeHtml(who);
           b.title = t('shiftTitle', letter, who, sh.start, sh.end, sh.hours);
           b.addEventListener('click', (function (idx, sidx) {
-            return function () { pickPersonForSlot(idx, sidx); };
+            return function (e) {
+              e.stopPropagation();
+              pickPersonForSlot(idx, sidx);
+            };
           })(dayIndex, si));
           sw.appendChild(b);
         });
@@ -451,6 +466,93 @@
   function closePicker() {
     $('pickerOverlay').classList.remove('show');
     state.pickerMode = null;
+  }
+
+  function openDayDetail(dayIndex) {
+    var day = state.schedule.days[dayIndex];
+    var dowName = DAY_NAMES[new Date(day.date).getDay()];
+    $('dayDetailTitle').textContent = day.date + ' · ' + dowName;
+
+    var content = $('dayDetailContent');
+    content.innerHTML = '';
+
+    var totalHours = 0;
+
+    day.shifts.forEach(function (sh, si) {
+      var letter = String.fromCharCode(65 + si);
+      var s = personStyle(sh.person >= 0 ? sh.person : -1);
+
+      var row = document.createElement('div');
+      row.className = 'shift-row';
+
+      var chip = document.createElement('div');
+      chip.className = 'shift-chip';
+      chip.style.background = sh.person >= 0 ? s.color : '#94a3b8';
+      chip.textContent = letter;
+
+      var info = document.createElement('div');
+      info.className = 'shift-info';
+
+      var personDiv = document.createElement('div');
+      personDiv.className = 'shift-person';
+      personDiv.textContent = sh.person >= 0 ? state.names[sh.person] : '–';
+
+      var timeDiv = document.createElement('div');
+      timeDiv.className = 'shift-time';
+      timeDiv.textContent = sh.start + '–' + sh.end + ' · ' + sh.hours + ' h';
+
+      info.appendChild(personDiv);
+      info.appendChild(timeDiv);
+      row.appendChild(chip);
+      row.appendChild(info);
+      content.appendChild(row);
+
+      totalHours += sh.hours;
+    });
+
+    if (day.off >= 0) {
+      var row = document.createElement('div');
+      row.className = 'shift-row';
+
+      var chip = document.createElement('div');
+      chip.className = 'shift-chip';
+      chip.style.background = '#475569';
+      chip.textContent = 'O';
+
+      var info = document.createElement('div');
+      info.className = 'shift-info';
+
+      var personDiv = document.createElement('div');
+      personDiv.className = 'shift-person';
+      personDiv.textContent = state.names[day.off];
+
+      var timeDiv = document.createElement('div');
+      timeDiv.className = 'shift-time';
+      timeDiv.textContent = t('offPerson');
+
+      info.appendChild(personDiv);
+      info.appendChild(timeDiv);
+      row.appendChild(chip);
+      row.appendChild(info);
+      content.appendChild(row);
+    }
+
+    var totalRow = document.createElement('div');
+    totalRow.className = 'total-row';
+    var totalLabel = document.createElement('span');
+    totalLabel.textContent = t('totalHours');
+    var totalValue = document.createElement('span');
+    totalValue.className = 'total-value';
+    totalValue.textContent = totalHours.toFixed(1) + ' h';
+    totalRow.appendChild(totalLabel);
+    totalRow.appendChild(totalValue);
+    content.appendChild(totalRow);
+
+    $('dayDetailOverlay').classList.add('show');
+  }
+
+  function closeDayDetail() {
+    $('dayDetailOverlay').classList.remove('show');
   }
 
   function pickPersonForSlot(dayIndex, shiftIdx) {
@@ -789,14 +891,29 @@
     });
     $('seedApply').addEventListener('click', regenerate);
     $('regenBtn').addEventListener('click', regenerate);
+    $('dayDetailClose').addEventListener('click', closeDayDetail);
+    $('dayDetailOverlay').addEventListener('click', function (e) {
+      if (e.target === $('dayDetailOverlay')) closeDayDetail();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closePicker();
+        closeDayDetail();
+      }
+    });
     $('exportCsv').addEventListener('click', exportCsv);
     $('exportPdf').addEventListener('click', exportPdf);
 
     $('calendar').addEventListener('click', function (e) {
       var cell = e.target.closest('.cal-cell');
       if (!cell || !cell.dataset.idx) return;
-      state.selected = parseInt(cell.dataset.idx, 10);
+      var dayIndex = parseInt(cell.dataset.idx, 10);
+      var shift = e.target.closest('.shift');
+      state.selected = dayIndex;
       render();
+      if (!shift) {
+        openDayDetail(dayIndex);
+      }
     });
 
     // ---- drag & drop to swap shifts / off-days ----

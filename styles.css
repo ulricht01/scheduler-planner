@@ -398,6 +398,60 @@ button.primary:hover { background: var(--accent-dark); }
   justify-content: flex-end;
 }
 
+/* ---- day detail overlay ---- */
+.day-detail {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  width: 320px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
+  max-width: 92vw;
+}
+.day-detail h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: var(--text);
+}
+.day-detail .shift-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.day-detail .shift-row:last-child { border-bottom: none; }
+.day-detail .shift-chip {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.day-detail .shift-info { flex: 1; }
+.day-detail .shift-person {
+  font-weight: 600;
+  color: var(--text);
+}
+.day-detail .shift-time {
+  font-size: 12px;
+  color: var(--muted);
+}
+.day-detail .total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-weight: 700;
+  color: var(--text);
+}
+.day-detail .total-value { color: var(--accent); }
+
 .hidden { display: none !important; }
 
 /* ---- print (PDF) ---- */
