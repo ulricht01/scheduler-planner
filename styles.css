@@ -221,26 +221,24 @@ body {
 .cal-cell.muted { opacity: .45; cursor: default; background: #f8fafc; }
 
 @media (max-width: 768px) {
-  .layout { grid-template-columns: 1fr; gap: 12px; }
-  .panel { padding: 12px; }
-  .panel h2 { font-size: 13px; margin: 0 0 8px; }
+  /* 3 days per row on mobile - use CSS grid on calendar */
+  #calendar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cal-cell { min-height: auto; }
   
-  /* Calendar compact on phone */
-  .cal-cell { min-height: 52px; border-radius: 8px; }
-  .cal-cell .dnum { top: 3px; left: 5px; font-size: 13px; }
-  .cal-cell .dow-in-cell { top: 3px; right: 4px; font-size: 7px; text-transform: uppercase; letter-spacing: .05em; }
-  .cal-cell .shifts { gap: 2px; }
-  .cal-cell .shift { padding: 1px 4px; font-size: 10px; }
-  .cal-cell .shift .letter { font-size: 12px; }
-  .cal-cell .total-row { font-size: 10px; margin-top: 4px; }
+  .cal-cell .dnum { top: 6px; left: 8px; font-size: 16px; }
+  .cal-cell .dow-in-cell { top: 6px; right: 6px; font-size: 9px; }
+  .cal-cell .shifts { gap: 4px; }
+  .cal-cell .shift { padding: 3px 6px; font-size: 11px; }
+  .cal-cell .shift .letter { font-size: 13px; }
+  .cal-cell .total-row { font-size: 11px; margin-top: 2px; }
   
   /* Name inputs on phone */
-  .name-input { padding: 6px 8px; font-size: 12px; }
-  .name-label { font-size: 11px; margin-bottom: 4px; }
-  .name-row { gap: 8px; margin-bottom: 8px; }
+  .name-input { padding: 8px 10px; font-size: 13px; }
+  .name-label { font-size: 12px; margin-bottom: 6px; }
+  .name-row { gap: 10px; margin-bottom: 10px; }
   
   /* Close button */
-  .detail-close { width: 20px; height: 20px; font-size: 16px; top: 5px; right: 5px; }
+  .detail-close { width: 24px; height: 24px; font-size: 18px; top: 6px; right: 6px; }
 }
 .cal-cell.muted:hover { box-shadow: none; border-color: var(--line); }
 .cal-cell.wkend { background: #fcfcfd; }
