@@ -916,62 +916,58 @@
       }
     });
 
-    // ---- drag & drop to swap shifts / off-days ----
-    $('calendar').addEventListener('dragstart', function (e) {
+    // ---- touch drag & drop (mobile) ----
+    var touchState = null;
+
+    $('calendar').addEventListener('touchstart', function (e) {
       var shift = e.target.closest('.shift');
       if (!shift || !shift.dataset.dayIdx) return;
       var d = parseInt(shift.dataset.dayIdx, 10);
       var s = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
-      var p = s === -1 ? state.schedule.days[d].off : state.schedule.days[d].shifts[s].person;
-      if (p < 0) return;
-      dragState = { dayIdx: d, shiftIdx: s, personIdx: p, isOff: s === -1 };
-      shift.classList.add('drag-source');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', d + ',' + s);
-    });
-
-    $('calendar').addEventListener('dragover', function (e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (!dragState) return;
-      var shift = e.target.closest('.shift');
-      if (!shift || !shift.dataset.dayIdx) return;
-      var d = parseInt(shift.dataset.dayIdx, 10);
-      var s = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
-      if (d !== dragState.dayIdx || s !== dragState.shiftIdx) {
-        shift.classList.add('drop-target');
-      }
-    });
-
-    $('calendar').addEventListener('dragleave', function (e) {
-      var shift = e.target.closest('.shift');
-      if (shift) shift.classList.remove('drop-target');
-    });
-
-    $('calendar').addEventListener('drop', function (e) {
-      e.preventDefault();
-      var shift = e.target.closest('.shift');
-      document.querySelectorAll('.shift').forEach(function (el) {
-        el.classList.remove('drag-source', 'drop-target');
-      });
-      if (!dragState || !shift || !shift.dataset.dayIdx) {
-        dragState = null;
+      if (s === -1 && shift.classList.contains('off')) {
+        touchState = { dayIdx: d, shiftIdx: s, isOff: true };
+      } else if (s !== -1) {
+        var person = state.schedule.days[d].shifts[s].person;
+        if (person < 0) return;
+        touchState = { dayIdx: d, shiftIdx: s, personIdx: person, isOff: false };
+      } else {
         return;
       }
-      var d2 = parseInt(shift.dataset.dayIdx, 10);
-      var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
-      if (d2 !== dragState.dayIdx || s2 !== dragState.shiftIdx) {
-        swapChips(dragState.dayIdx, dragState.shiftIdx, d2, s2);
-      }
-      dragState = null;
-    });
+      shift.classList.add('drag-source');
+      e.preventDefault();
+    }, { passive: false });
 
-    $('calendar').addEventListener('dragend', function () {
+    $('calendar').addEventListener('touchmove', function (e) {
+      if (!touchState) return;
+      e.preventDefault();
+      var touch = e.touches[0];
+      var target = document.elementFromPoint(touch.clientX, touch.clientY);
+      var shift = target ? target.closest('.shift') : null;
+      document.querySelectorAll('.shift').forEach(function (el) {
+        el.classList.remove('drop-target');
+      });
+      if (shift && shift.dataset.dayIdx && shift.dataset.dayIdx != touchState.dayIdx) {
+        shift.classList.add('drop-target');
+      }
+    }, { passive: false });
+
+    $('calendar').addEventListener('touchend', function (e) {
+      if (!touchState) return;
+      var touch = e.changedTouches[0];
+      var target = document.elementFromPoint(touch.clientX, touch.clientY);
+      var shift = target ? target.closest('.shift') : null;
       document.querySelectorAll('.shift').forEach(function (el) {
         el.classList.remove('drag-source', 'drop-target');
       });
-      dragState = null;
-    });
+      if (shift && shift.dataset.dayIdx && !shift.classList.contains('drag-source')) {
+        var d2 = parseInt(shift.dataset.dayIdx, 10);
+        var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
+        if (d2 !== touchState.dayIdx || s2 !== touchState.shiftIdx) {
+          swapChips(touchState.dayIdx, touchState.shiftIdx, d2, s2);
+        }
+      }
+      touchState = null;
+    }, { passive: false });
 
     $('yearSelect').addEventListener('change', function () {
       var y = parseInt($('yearSelect').value, 10);
