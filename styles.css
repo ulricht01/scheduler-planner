@@ -224,6 +224,7 @@ body {
   /* 3 days per row on mobile - use CSS grid on calendar */
   #calendar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .cal-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cal-head { display: none; }
   .cal-cell { min-height: auto; }
   
   .cal-cell .dnum { top: 6px; left: 8px; font-size: 16px; }
