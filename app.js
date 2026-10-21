@@ -241,10 +241,13 @@
         dw.textContent = DAY_NAMES[date.getDay()];
         cell.appendChild(dw);
 
-        var clickHint = document.createElement('div');
-        clickHint.className = 'cal-cell-hint';
-        clickHint.textContent = 'ℹ';
-        clickHint.title = t('dayDetail');
+        var clickHint = document.createElement('button');
+        clickHint.className = 'cal-cell-detail';
+        clickHint.textContent = 'Detail';
+        clickHint.addEventListener('click', function (e) {
+          e.stopPropagation();
+          openDayDetail(dayIndex);
+        });
         cell.appendChild(clickHint);
 
         var day = state.schedule.days[dayIndex];
