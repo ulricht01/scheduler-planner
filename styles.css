@@ -328,6 +328,27 @@ body {
   outline: 3px solid var(--accent-dark);
   outline-offset: 2px;
   box-shadow: 0 0 0 3px var(--accent);
+.cal-cell .shift.swap-target {
+  background: var(--accent-light);
+  outline-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent);
+  position: relative;
+}
+.cal-cell .shift.swap-target::before {
+  content: '→ ' attr(data-from);
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.cal-cell .shift.swap-target .dnum,
+.cal-cell .shift.swap-target .dow-in-cell,
+.cal-cell .shift.swap-target .shift {
+  opacity: 0.7;
+}
 }
 .cal-cell .off {
   font-size: 11.5px;
