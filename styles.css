@@ -220,31 +220,37 @@ body {
 }
 .cal-cell:hover .cal-cell-detail { display: inline-block; opacity: 1; }
 .cal-cell.muted { opacity: .45; cursor: default; background: #f8fafc; }
-
 @media (max-width: 768px) {
-  /* Center the calendar horizontally */
-  .cal-wrap { display: flex; justify-content: center; }
-  #calendar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
-  #calendar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .cal-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  /* 1 day per row on mobile */
+  #calendar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+  .cal-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
   .cal-head { display: none; }
   .cal-cell { min-height: auto; }
-  
-  .cal-cell .dnum { top: 6px; left: 8px; font-size: 16px; }
-  .cal-cell .dow-in-cell { top: 6px; right: 6px; font-size: 9px; }
-  .cal-cell .shifts { gap: 4px; }
-  .cal-cell .shift { padding: 3px 6px; font-size: 11px; }
-  .cal-cell .shift .letter { font-size: 13px; }
-  .cal-cell .total-row { font-size: 11px; margin-top: 2px; }
-  
+
+  .cal-cell .dnum { top: 4px; left: 8px; font-size: 14px; }
+  .cal-cell .dow-in-cell { top: 4px; right: 8px; font-size: 9px; }
+  .cal-cell .shifts { gap: 4px; flex-direction: column; }
+  .cal-cell .shift { padding: 4px 8px; font-size: 11px; }
+  .cal-cell .shift .letter { font-size: 12px; }
+  .cal-cell .total-row { font-size: 11px; margin-top: 4px; }
+
   /* Name inputs on phone */
   .name-input { padding: 8px 10px; font-size: 13px; }
   .name-label { font-size: 12px; margin-bottom: 6px; }
   .name-row { gap: 10px; margin-bottom: 10px; }
-  
+
   /* Close button */
   .detail-close { width: 24px; height: 24px; font-size: 18px; top: 6px; right: 6px; }
-}
+}}
 .cal-cell.muted:hover { box-shadow: none; border-color: var(--line); }
 .cal-cell.wkend { background: #fcfcfd; }
 .cal-cell.wkend.selected { background: #e0f2f1; }
