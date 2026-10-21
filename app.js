@@ -241,6 +241,12 @@
         dw.textContent = DAY_NAMES[date.getDay()];
         cell.appendChild(dw);
 
+        var clickHint = document.createElement('div');
+        clickHint.className = 'cal-cell-hint';
+        clickHint.textContent = 'ℹ';
+        clickHint.title = t('dayDetail');
+        cell.appendChild(clickHint);
+
         var day = state.schedule.days[dayIndex];
         var sw = document.createElement('div');
         sw.className = 'shifts';
