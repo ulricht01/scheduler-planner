@@ -460,11 +460,13 @@
       })(i));
       list.appendChild(btn);
     }
+    $('pickerOverlay').classList.remove('hidden');
     $('pickerOverlay').classList.add('show');
   }
 
   function closePicker() {
     $('pickerOverlay').classList.remove('show');
+    $('pickerOverlay').classList.add('hidden');
     state.pickerMode = null;
   }
 
@@ -548,11 +550,15 @@
     totalRow.appendChild(totalValue);
     content.appendChild(totalRow);
 
-    $('dayDetailOverlay').classList.add('show');
+    var overlay = $('dayDetailOverlay');
+    overlay.classList.remove('hidden');
+    overlay.classList.add('show');
   }
 
   function closeDayDetail() {
-    $('dayDetailOverlay').classList.remove('show');
+    var overlay = $('dayDetailOverlay');
+    overlay.classList.remove('show');
+    overlay.classList.add('hidden');
   }
 
   function pickPersonForSlot(dayIndex, shiftIdx) {
