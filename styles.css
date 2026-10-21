@@ -192,6 +192,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 74px;
+  justify-content: center;
   background: #fff;
   transition: border-color .12s, box-shadow .12s, background .12s;
   user-select: none;
