@@ -177,22 +177,6 @@ body {
   box-shadow: 0 0 0 3px rgba(15, 118, 110, .15);
   background: #f0fdfa;
 }
-.cal-cell-detail {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity .15s;
-  display: none;
-}
-.cal-cell:hover .cal-cell-detail { display: inline-block; opacity: 1; }
 .cal-cell.muted { opacity: .45; cursor: default; background: #f8fafc; }
 .cal-cell.muted:hover { box-shadow: none; border-color: var(--line); }
 .cal-cell.wkend { background: #fcfcfd; }
@@ -435,17 +419,16 @@ button.primary:hover { background: var(--accent-dark); }
   right: 8px;
   width: 24px;
   height: 24px;
-  background: #ff5f57;
+  background: transparent;
   border: none;
-  color: #fff;
-  font-size: 18px;
+  color: var(--muted);
+  font-size: 20px;
   font-weight: bold;
   line-height: 1;
   cursor: pointer;
-  border-radius: 50%;
-  transition: background .15s, transform .08s;
+  transition: color .15s;
 }
-.detail-close:hover { background: #e04e47; transform: scale(1.1); }
+.detail-close:hover { color: var(--warn); }
 .detail-close:focus { outline: none; }
 .day-detail .shift-row {
   display: flex;
