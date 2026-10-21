@@ -259,12 +259,6 @@
           var letter = String.fromCharCode(65 + si);
           b.innerHTML = '<span class="letter">' + letter + '</span> ' + escapeHtml(who);
           b.title = t('shiftTitle', letter, who, sh.start, sh.end, sh.hours);
-          b.addEventListener('click', (function (idx, sidx) {
-            return function (e) {
-              e.stopPropagation();
-              pickPersonForSlot(idx, sidx);
-            };
-          })(dayIndex, si));
           sw.appendChild(b);
         });
 
