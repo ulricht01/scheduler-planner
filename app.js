@@ -42,7 +42,7 @@
       maxStreak: 'Max streak',
       fullWeekend: 'Full weekend',
       defaults: 'Defaults',
-      hint: 'Click a day cell, then a person chip to rest them on that day.',
+      hint: 'Click a day cell, then a person chip to rest them. Drag a shift onto another to swap.',
       selected: 'Selected {0}',
       generateEmpty: 'Generate a schedule to see who is working.',
       prevMonth: 'Previous month',
@@ -104,7 +104,7 @@
       maxStreak: 'Max Serie',
       fullWeekend: 'Volle Wochenende frei',
       defaults: 'Standard',
-      hint: 'Klicke auf eine Zelle, dann auf einen Namen, um sie einzuteilen.',
+      hint: 'Klicke auf eine Zelle, dann auf einen Namen, um ihn einzuteilen. Ziehe eine Schicht auf eine andere, um zu tauschen.',
       selected: 'Gewählt {0}',
       generateEmpty: 'Erstelle einen Dienstplan, um zu sehen, wer arbeitet.',
       prevMonth: 'Vorheriger Monat',
@@ -239,6 +239,9 @@
           b.className = 'shift' + (si === 0 ? ' a' : ' b');
           b.style.background = sh.person >= 0 ? s.color : '#94a3b8';
           b.style.color = '#fff';
+          b.draggable = sh.person >= 0;
+          b.dataset.dayIdx = dayIndex;
+          b.dataset.shiftIdx = si;
           var who = sh.person >= 0 ? state.names[sh.person] : '–';
           var letter = String.fromCharCode(65 + si);
           b.innerHTML = '<span class="letter">' + letter + '</span> ' + escapeHtml(who);
@@ -285,6 +288,8 @@
     pickerMode: null,
     status: 'idle'
   };
+
+  var dragState = null; // {dayIdx, shiftIdx, personIdx}
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -478,6 +483,26 @@
       }
     }
     closePicker();
+    revalidate();
+    refreshTotals();
+    render();
+  }
+
+  function swapShifts(d1, s1, d2, s2) {
+    if (d1 === d2 && s1 === s2) return;
+    var day1 = state.schedule.days[d1];
+    var day2 = state.schedule.days[d2];
+    var p1 = day1.shifts[s1].person;
+    var p2 = day2.shifts[s2].person;
+    if (p1 < 0 || p2 < 0 || p1 === p2) return;
+    // Cannot place the off person of either day onto a shift of that day
+    if (p2 === day1.off || p1 === day2.off) return;
+    // After swap, each day must still have two different workers
+    var day1Other = day1.shifts[1 - s1].person;
+    var day2Other = day2.shifts[1 - s2].person;
+    if (p2 === day1Other || p1 === day2Other) return;
+    day1.shifts[s1].person = p2;
+    day2.shifts[s2].person = p1;
     revalidate();
     refreshTotals();
     render();
@@ -739,6 +764,63 @@
       if (!cell || !cell.dataset.idx) return;
       state.selected = parseInt(cell.dataset.idx, 10);
       render();
+    });
+
+    // ---- drag & drop to swap shifts ----
+    $('calendar').addEventListener('dragstart', function (e) {
+      var shift = e.target.closest('.shift');
+      if (!shift || !shift.dataset.dayIdx || !shift.draggable) return;
+      var d = parseInt(shift.dataset.dayIdx, 10);
+      var s = shift.classList.contains('a') ? 0 : 1;
+      var p = state.schedule.days[d].shifts[s].person;
+      if (p < 0) return;
+      dragState = { dayIdx: d, shiftIdx: s, personIdx: p };
+      shift.classList.add('drag-source');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', d + ',' + s);
+    });
+
+    $('calendar').addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (!dragState) return;
+      var shift = e.target.closest('.shift');
+      if (!shift || !shift.dataset.dayIdx) return;
+      var d = parseInt(shift.dataset.dayIdx, 10);
+      var s = shift.classList.contains('a') ? 0 : 1;
+      if (d !== dragState.dayIdx || s !== dragState.shiftIdx) {
+        shift.classList.add('drop-target');
+      }
+    });
+
+    $('calendar').addEventListener('dragleave', function (e) {
+      var shift = e.target.closest('.shift');
+      if (shift) shift.classList.remove('drop-target');
+    });
+
+    $('calendar').addEventListener('drop', function (e) {
+      e.preventDefault();
+      var shift = e.target.closest('.shift');
+      document.querySelectorAll('.shift').forEach(function (el) {
+        el.classList.remove('drag-source', 'drop-target');
+      });
+      if (!dragState || !shift || !shift.dataset.dayIdx) {
+        dragState = null;
+        return;
+      }
+      var d2 = parseInt(shift.dataset.dayIdx, 10);
+      var s2 = shift.classList.contains('a') ? 0 : 1;
+      if (d2 !== dragState.dayIdx || s2 !== dragState.shiftIdx) {
+        swapShifts(dragState.dayIdx, dragState.shiftIdx, d2, s2);
+      }
+      dragState = null;
+    });
+
+    $('calendar').addEventListener('dragend', function () {
+      document.querySelectorAll('.shift').forEach(function (el) {
+        el.classList.remove('drag-source', 'drop-target');
+      });
+      dragState = null;
     });
 
     $('yearSelect').addEventListener('change', function () {

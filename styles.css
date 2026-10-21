@@ -226,6 +226,22 @@ body {
   opacity: .85;
   font-weight: 600;
 }
+.cal-cell .shift[draggable="true"] {
+  cursor: grab;
+}
+.cal-cell .shift[draggable="true"]:active {
+  cursor: grabbing;
+}
+.cal-cell .shift.drag-source {
+  opacity: .5;
+  border: 2px dashed var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.cal-cell .shift.drop-target {
+  outline: 3px solid var(--accent-dark);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--accent);
+}
 .cal-cell .off {
   font-size: 11.5px;
   font-weight: 700;
