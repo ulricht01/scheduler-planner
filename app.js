@@ -1018,6 +1018,74 @@
       touchState = null;
     }, { passive: false });
 
+    // ---- drag ghost (person being dragged) ----
+    var ghost = document.getElementById('dragGhost');
+
+    function showGhost(personIdx, clientX, clientY) {
+      if (!ghost) {
+        ghost = document.createElement('div');
+        ghost.id = 'dragGhost';
+        document.body.appendChild(ghost);
+      }
+      ghost.textContent = personIdx >= 0 ? state.names[personIdx] : 'Off';
+      ghost.style.display = 'block';
+      ghost.style.left = clientX + 12 + 'px';
+      ghost.style.top = clientY + 'px';
+    }
+
+    function hideGhost() {
+      if (ghost) {
+        ghost.style.display = 'none';
+      }
+    }
+
+    document.addEventListener('mousemove', function (e) {
+      hideGhost();
+      if (mouseState) {
+        var target = document.elementFromPoint(e.clientX, e.clientY);
+        var shift = target ? target.closest('.shift') : null;
+        document.querySelectorAll('.shift').forEach(function (el) {
+          el.classList.remove('drag-source', 'drop-target');
+        });
+        if (shift && shift.dataset.dayIdx && !shift.classList.contains('drag-source')) {
+          var d2 = parseInt(shift.dataset.dayIdx, 10);
+          var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
+          if (d2 !== mouseState.dayIdx || s2 !== mouseState.shiftIdx) {
+            swapChips(mouseState.dayIdx, mouseState.shiftIdx, d2, s2);
+          }
+        }
+      }
+      mouseState = null;
+    });
+
+    document.addEventListener('touchmove', function (e) {
+      if (touchState) {
+        showGhost(touchState.personIdx, e.touches[0].clientX, e.touches[0].clientY);
+      } else {
+        hideGhost();
+      }
+    }, { passive: false });
+
+    document.addEventListener('touchend', function (e) {
+      hideGhost();
+      if (touchState) {
+        var touch = e.changedTouches[0];
+        var target = document.elementFromPoint(touch.clientX, touch.clientY);
+        var shift = target ? target.closest('.shift') : null;
+        document.querySelectorAll('.shift').forEach(function (el) {
+          el.classList.remove('drag-source', 'drop-target');
+        });
+        if (shift && shift.dataset.dayIdx && !shift.classList.contains('drag-source')) {
+          var d2 = parseInt(shift.dataset.dayIdx, 10);
+          var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
+          if (d2 !== touchState.dayIdx || s2 !== touchState.shiftIdx) {
+            swapChips(touchState.dayIdx, touchState.shiftIdx, d2, s2);
+          }
+        }
+      }
+      touchState = null;
+    }, { passive: false });
+
 
     $('yearSelect').addEventListener('change', function () {
       var y = parseInt($('yearSelect').value, 10);
