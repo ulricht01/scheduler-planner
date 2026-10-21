@@ -236,6 +236,9 @@ body {
   .cal-head { display: none; }
   .cal-cell { min-height: auto; }
 
+  /* Hide blank previous/next month cells on mobile */
+  .cal-cell.muted { display: none; }
+
   .cal-cell .dnum { top: 4px; left: 8px; font-size: 14px; }
   .cal-cell .dow-in-cell { top: 4px; right: 8px; font-size: 9px; }
   .cal-cell .shifts { gap: 4px; flex-direction: column; }
