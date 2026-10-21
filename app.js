@@ -371,7 +371,12 @@
   }
 
   function setStatus(cl, msg) {
-    var bar = $('statusBar');
+    var bar = $('statusBar') || (function () {
+      var el = document.createElement('div');
+      el.id = 'statusBar';
+      document.body.insertBefore(el, document.body.firstChild);
+      return el;
+    })();
     bar.className = 'status-bar ' + cl;
     bar.textContent = msg;
   }
