@@ -920,7 +920,52 @@
         openDayDetail(dayIndex);
       }
     });
+    // ---- mouse drag & drop for desktop ----
+    var mouseState = null;
 
+    $('calendar').addEventListener('mousedown', function (e) {
+      var shift = e.target.closest('.shift');
+      if (!shift || !shift.dataset.dayIdx) return;
+      var d = parseInt(shift.dataset.dayIdx, 10);
+      var s = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
+      var p = s === -1 ? state.schedule.days[d].off : state.schedule.days[d].shifts[s].person;
+      if (p < 0) return;
+      mouseState = { dayIdx: d, shiftIdx: s, personIdx: p, isOff: s === -1 };
+      shift.classList.add('drag-source');
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!mouseState) return;
+      e.preventDefault();
+      var target = document.elementFromPoint(e.clientX, e.clientY);
+      var shift = target ? target.closest('.shift') : null;
+      document.querySelectorAll('.shift').forEach(function (el) {
+        el.classList.remove('drop-target');
+      });
+      if (shift && shift.dataset.dayIdx && shift.dataset.dayIdx != mouseState.dayIdx) {
+        shift.classList.add('drop-target');
+      }
+    });
+
+    document.addEventListener('mouseup', function (e) {
+      if (!mouseState) return;
+      var target = document.elementFromPoint(e.clientX, e.clientY);
+      var shift = target ? target.closest('.shift') : null;
+      document.querySelectorAll('.shift').forEach(function (el) {
+        el.classList.remove('drag-source', 'drop-target');
+      });
+      if (shift && shift.dataset.dayIdx && !shift.classList.contains('drag-source')) {
+        var d2 = parseInt(shift.dataset.dayIdx, 10);
+        var s2 = shift.dataset.shiftIdx === '-1' ? -1 : parseInt(shift.dataset.shiftIdx, 10);
+        if (d2 !== mouseState.dayIdx || s2 !== mouseState.shiftIdx) {
+          swapChips(mouseState.dayIdx, mouseState.shiftIdx, d2, s2);
+        }
+      }
+      mouseState = null;
+    });
+
+    // ---- touch drag & drop (mobile) ----
     // ---- touch drag & drop (mobile) ----
     var touchState = null;
 
@@ -955,7 +1000,6 @@
         shift.classList.add('drop-target');
       }
     }, { passive: false });
-
     $('calendar').addEventListener('touchend', function (e) {
       if (!touchState) return;
       var touch = e.changedTouches[0];
@@ -973,6 +1017,7 @@
       }
       touchState = null;
     }, { passive: false });
+
 
     $('yearSelect').addEventListener('change', function () {
       var y = parseInt($('yearSelect').value, 10);
